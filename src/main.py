@@ -21,6 +21,7 @@ from skforecast.utils import load_forecaster
 from get_exog_data import *
 from utils import *
 from sklearn.metrics import mean_absolute_percentage_error
+import joblib
 
 
 # Warnings configuration
@@ -28,13 +29,12 @@ from sklearn.metrics import mean_absolute_percentage_error
 #import warnings
 #warnings.filterwarnings('ignore')
 pd.options.plotting.backend = "plotly"
+import pandas as pd
 
 import os
-import pandas as pd
 cwd = os.path.dirname(__file__)
 # Construct the full path to the CSV file
 file_path = os.path.join(cwd, '../data/power_load_BE_elia_15M_2015_2024.csv')
-
 df = pd.read_csv(file_path, delimiter = ";", on_bad_lines="skip")
 
 df = df[df["Datetime"].str.contains("2023|2022")]
@@ -157,6 +157,7 @@ data_train = data.loc[data_train_index].loc[start_date:end_date]
 data_test  = data.loc[data_test_index].loc[start_date:end_date]
 data = data.loc[start_date:end_date]
 
+
 print(data_train.isna().sum() + data_test.isna().sum())
 
 exog_vars = ["month", "dayofweek", "hour"] + parameters + rolled_parameters
@@ -165,7 +166,6 @@ exog_vars = ["month", "dayofweek", "hour"] + parameters + rolled_parameters
 # ==============================================================================
 
 regressor  = RandomForestRegressor(max_depth=10, n_estimators=50)
-regressor_name = str(regressor).split('()')[0]
 forecaster = ForecasterAutoreg(
                  regressor = regressor,
                  lags      = hour_in_month
@@ -173,19 +173,7 @@ forecaster = ForecasterAutoreg(
 
 forecaster.fit(y=data_train['y'], exog=data_train[exog_vars])
 
-# Predictions
-# ==============================================================================
-predictions = forecaster.predict(steps = steps,
-                                 exog  = data_test[exog_vars])
-predictions.index = data_test.index
-data_test[regressor_name] = predictions
-fig = data_test[["y", "Most recent forecast", regressor_name, "Week-ahead forecast"]].plot.line()
-fig.show()
+#Save the trained model
+modelling_file_path = os.path.join(cwd, './modelling/model/forecaster.joblib')
+joblib.dump(forecaster, modelling_file_path)
 
-for col in ["Most recent forecast",regressor_name , "Week-ahead forecast"]:
-    error_mape = mean_absolute_percentage_error(
-                    y_true = data_test['y'],
-                    y_pred = data_test[col]
-                )
-
-print(f"Test error (MAPE) for {col}: {error_mape*100}%")
