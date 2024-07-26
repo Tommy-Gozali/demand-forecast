@@ -57,6 +57,7 @@ class BacktestingForecaster():
             initial_train_size=self.initial_train_size,
             test_size=self.steps,
             refit=self.refit,
+            verbose=False,
         )
     
     def get_backtesting_folds(self,
@@ -100,7 +101,8 @@ class BacktestingForecaster():
         
         return get_training_validation_folds(
             df= df_train_val_index_transformed,
-            df_input= backtest_result_df[["y"]],
+            df_input= self.y,
             df_pred= backtest_result_df[[regressor_name]],
             folds_type="validation")
+
         
