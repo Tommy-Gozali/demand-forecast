@@ -38,8 +38,8 @@ class DataCleaningService:
     #date_range = f"{start_date}:{end_date}"
     df.index = pd.to_datetime(df["Datetime"], utc = True)
     df = df.drop(columns = ["Datetime", "Resolution code"])
-    df = df.loc[start_date:end_date]
-    return df.apply(lambda x : x.astype(float)).sort_index()
+    df = df.sort_index().loc[start_date:end_date]
+    return df.apply(lambda x : x.astype(float))
 
   def check_missing_date(self,
                          df: pd.DataFrame):
