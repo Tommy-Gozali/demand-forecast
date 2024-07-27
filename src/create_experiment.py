@@ -2,6 +2,8 @@ from sklearn.model_selection import train_test_split
 import pandas as pd
 import numpy  as np
 import math
+import plotly.graph_objs as go
+from plotly import subplots
 
 minute_in_hour = 60
 hour_in_day = 24
@@ -167,3 +169,35 @@ class CreateExperiment:
         test_indexes   = indexes[index_val_end_date_int:]
 
         return train_indexes, val_indexes, test_indexes
+    
+    def create_scatter_traces(self, df: pd.DataFrame, color: str, name: str, y: str) -> go.Scatter:
+        trace = go.Scatter(
+            x = df.index,
+            y = df[y],
+            name=name,
+            marker=dict(
+                  color=color,
+                  line=dict(
+                  color=color)
+                ),
+            )
+        return trace
+
+    def visualize_train_test_validation_split(self, y: str) -> None:
+        train_indexes, val_indexes, test_indexes = self.create_train_test_validation_split_round()
+        data = self.get_input_data()
+        data_train = data.loc[train_indexes]
+        data_val   = data.loc[val_indexes]
+        data_test  = data.loc[test_indexes]
+
+        trace1 = self.create_scatter_traces(data_train, 'rgb(128, 0, 128)', "train", y=y)
+        trace2 = self.create_scatter_traces(data_val,   'rgba(50, 171, 96, 0.6)', "test",  y=y)
+        trace3 = self.create_scatter_traces(data_test,  'rgba(0, 100, 50, 0.6)', "val",  y=y)
+
+        fig = subplots.make_subplots(rows=1,cols=1, vertical_spacing=0.5)
+        fig.add_trace(trace1)
+        fig.add_trace(trace2)
+        fig.add_trace(trace3)
+        fig.show()
+        return fig
+      
