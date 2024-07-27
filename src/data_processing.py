@@ -5,7 +5,7 @@ import itertools
 
 from copy import deepcopy
 from utils import DataCleaningService, FeatureEngineering
-from create_experiment import CreateExperiment
+from create_experiment import CreateTimeSeriesExperiment
 from get_exog_data import OpenMeteoApi
 from sklearn.preprocessing import PolynomialFeatures
 
@@ -133,6 +133,4 @@ print("New datasets after considering rolled features!")
 print(f"Train dates : {data_train.index.min()} --- {data_train.index.max()}  (n={len(data_train.index)})")
 print(f"Test dates  : {data_val.index.min()} --- {data_val.index.max()}  (n={len(data_val.index)})")
 print(f"Val dates   : {data_test.index.min()} --- {data_test.index.max()}  (n={len(data_test.index)})")
-
 exog_vars = basic_temporal_features + exog_wea_features + rolled_features
-
