@@ -10,7 +10,7 @@ hour_in_day = 24
 day_in_week = 7
 week_in_month = 4
 
-class CreateExperiment:
+class CreateTimeSeriesExperiment:
     """class to create experiment"""
     global minute_in_hour, hour_in_day, day_in_week, week_in_month
 
@@ -45,19 +45,19 @@ class CreateExperiment:
 
     @frequency_unit_input.setter
     def frequency_unit_input(self, value: str) -> str:
-        allowed_values = ["m", "H"]
+        allowed_values = ["m", "h"]
         if value in allowed_values:
             self._frequency_unit_input = value
         else:
-            raise ValueError("Only 'm' and 'H' are allowed")
+            raise ValueError("Only 'm' and 'h' are allowed")
 
     @frequency_unit_output.setter
     def frequency_unit_output(self, value: str) -> str:
-        allowed_values = ["m", "H"]
+        allowed_values = ["m", "h"]
         if value in allowed_values:
             self._frequency_unit_output = value
         else:
-            raise ValueError("Only 'm' and 'H' are allowed")
+            raise ValueError("Only 'm' and 'h' are allowed")
 
     @property
     def frequency_magnitude_input(self):
@@ -83,30 +83,6 @@ class CreateExperiment:
         else:
             raise ValueError("Only 1, 15, 30 are allowed")
 
-    """
-    @property
-    def frequency_input_output_validator(self):
-    #check frequency unit first
-
-    #only option that is not possible
-    if self.frequency_unit_input == "D" and self.frequency_unit_output == "H":
-        raise ValueError("Output have frequency unit is higher than input")
-
-    elif self.frequency_unit_input == "H" and self.frequency_unit_output == "H":
-        if self.frequency_unit_input < self.frequency_unit_output:
-        pass
-        else:
-        raise ValueError("Output have frequency unit is higher than input")
-
-    else:
-
-        if self.frequency_unit_output == self.frequency_unit_input:
-
-
-        elif (self.frequency_magnitude_input > self.frequency_magnitude_output):
-        :
-    """
-
     @property
     def frequency_converter(self):
         if self.frequency_magnitude_input == "m":
@@ -119,7 +95,7 @@ class CreateExperiment:
 
     @property
     def basic_durations(self) -> float:
-        if self.frequency_unit_output == "H" and self.frequency_magnitude_output == 1:
+        if self.frequency_unit_output == "h" and self.frequency_magnitude_output == 1:
             durations_in_day_ = self.frequency_magnitude_output * hour_in_day
 
         elif self.frequency_unit_output == "m" and self.frequency_magnitude_output in [15,30]:
@@ -153,14 +129,12 @@ class CreateExperiment:
     def get_input_data(self):
         return self.frequency_converter
 
-    def create_train_test_validation_split_round(self) -> list[pd.DataFrame().index]:
+    def create_train_test_validation_split_round(self) -> list[pd.DataFrame.index]:
         indexes = self.frequency_converter.index
 
         index_train = math.ceil(len(indexes) * self.train_size)
         index_train_end_date, index_train_end_date_int = self.get_last_index_round(indexes, index_train)
 
-        #index_test = index_train_end_date_int + math.ceil(len(indexes[index_train_end_date_int:]) * 0.5)
-        #index_test_end_date, index_test_end_date_int = self.get_last_index_round(indexes, index_test)
         index_val = index_train_end_date_int + math.ceil(len(indexes[index_train_end_date_int:]) * 0.5)
         index_val_end_date, index_val_end_date_int = self.get_last_index_round(indexes, index_val)
 

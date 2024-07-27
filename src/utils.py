@@ -28,18 +28,21 @@ class FeatureEngineering:
 
 class DataCleaningService:
 
-  def normalize_data(self,
+  def normalize_to_timeseries_df(self,
                      df: pd.DataFrame,
                      start_date: str,
-                     end_date  : str):
+                     end_date  : str, 
+                     date_index: str,
+                     non_float_int_cols: list[str])-> pd.DataFrame:
 
     #real_start_date = str(pd.to_datetime(start_date, format = "%Y-%m-%d") - pd.Timedelta(offset_rolling_feature_in_h, "H"))[:10]
 
     #date_range = f"{start_date}:{end_date}"
-    df.index = pd.to_datetime(df["Datetime"], utc = True)
-    df = df.drop(columns = ["Datetime", "Resolution code"])
-    df = df.sort_index().loc[start_date:end_date]
-    return df.apply(lambda x : x.astype(float))
+    df.index = pd.to_datetime(df[date_index], utc = True)
+    dropped_cols = [date_index] + non_float_int_cols
+    df = df.drop(columns = dropped_cols).sort_index()
+    df = df.loc[start_date:end_date]
+    return df
 
   def check_missing_date(self,
                          df: pd.DataFrame):
