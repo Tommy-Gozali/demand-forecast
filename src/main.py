@@ -15,7 +15,7 @@ import joblib
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from data_processing import (data_val, exog_vars, steps
+from data_processing import (data_test, exog_vars, steps
     #data, data_train, data_val, data_val, exog_vars, hour_in_month, steps
 )
 import plotly.express as px
@@ -40,7 +40,7 @@ joblib.dump(forecaster, modelling_file_path)
 # Predictions
 # ==============================================================================
 cwd = os.path.dirname(__file__)
-modelling_file_path = os.path.join(cwd, './modelling/model/forecaster.joblib')
+modelling_file_path = os.path.join(cwd, "results_gpu_train_XGBRegressor_24_steps.joblib") #'./modelling/model/forecaster.joblib')
 
 forecaster = joblib.load(modelling_file_path)
 regressor_name = str(forecaster.regressor).split('()')[0]
@@ -72,6 +72,6 @@ def predict_single_forecast(data_val: pd.DataFrame, steps: int, exog_vars: list)
     return fig
 
 predict_single_forecast(
-    data_val = data_val, 
+    data_val = data_test, 
     steps = steps, 
     exog_vars = exog_vars)

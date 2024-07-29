@@ -1,5 +1,4 @@
 import pandas as pd
-import matplotlib.pyplot as plt
 import torch # type: ignore
 import os
 import psutil
@@ -14,7 +13,7 @@ from skforecast.ForecasterAutoreg import ForecasterAutoreg
 
 data_train_val = pd.concat([data_train, data_val])
 
-
+torch.cuda.empty_cache()
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print('Using device:', device)
 
@@ -30,7 +29,7 @@ print(f"CPU RAM Free: {psutil.virtual_memory().available / 1024**3:.2f} GB")
 
 # Lags used as predictors
 regressor = XGBRegressor(
-                            n_estimators=5000,
+                            n_estimators=2000,
                             tree_method='gpu_hist',
                             gpu_id=0
                             )
@@ -45,8 +44,8 @@ lags_grid = [duration_in_day, duration_in_week, duration_in_month]
 def search_space(trial):
     search_space  = {
         #'n_estimators'     : trial.suggest_int('n_estimators', 1000, 1100),
-        'learning_rate'    : trial.suggest_loguniform('learning_rate', 1e-3, 1e-1),
-        'max_depth'        : trial.suggest_int('max_depth', 10, 15),
+        #'learning_rate'    : trial.suggest_loguniform('learning_rate', 1e-3, 1e-1),
+        #'max_depth'        : trial.suggest_int('max_depth', 10, 15),
         'min_samples_leaf' : trial.suggest_int('min_samples_leaf', 1., 10),
         'max_features'     : trial.suggest_categorical('max_features', ['log2', 'sqrt'])
     }
@@ -75,7 +74,7 @@ results, frozen_trial = bayesian_search_forecaster(
                             gap  = duration_in_week
                         )
 
-cwd = os.path.dirname(__file__)
+cwd = os.getcwd()
 regressor_name_to_save = str(regressor).split('(')[0]
-path = os.path.join(cwd, f'./data/results_gpu_train_{regressor_name_to_save}.csv')
+path = os.path.join(cwd, f'/data/results_gpu_train_{regressor_name_to_save}_{steps}_steps.csv')
 results.to_csv(path)

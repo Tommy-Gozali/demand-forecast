@@ -10,8 +10,8 @@ from get_exog_data import OpenMeteoApi
 from sklearn.preprocessing import PolynomialFeatures
 from feature_engine.creation import CyclicalFeatures
 
-cwd = os.path.abspath("")
-raw_data_file_path = os.path.join(cwd, './data/power_load_BE_elia_15M_2015_2024.csv')
+cwd = os.getcwd()
+raw_data_file_path = os.path.join(cwd, '../data/power_load_BE_elia_15M_2015_2024.csv')
 df = pd.read_csv(raw_data_file_path, delimiter = ";", on_bad_lines="skip")
 
 clean_start_date = "2021-11-01"
@@ -147,4 +147,4 @@ print(f"Test dates  : {data_val.index.min()} --- {data_val.index.max()}  (n={len
 print(f"Val dates   : {data_test.index.min()} --- {data_test.index.max()}  (n={len(data_test.index)})")
 
 exog_vars =  cyclical_fin_features + cyclical_raw_features + rolled_features \
-    + list(poly_features.columns.values) + temp_dd_features
+     + temp_dd_features + list(poly_features.columns.values)
