@@ -25,6 +25,12 @@ class FeatureEngineering:
     new_rolling_parameter_series = getattr(new_rolling_parameter_f, agg_method)()
     new_rolling_parameter_series.name = new_rolling_parameter_name
     return new_rolling_parameter_series.to_frame()
+  
+  def get_hdd_cdd(self,
+                 temperature: pd.Series)-> pd.DataFrame:
+    hdd = temperature.apply(lambda x: max(18 - x, 0))
+    cdd = temperature.apply(lambda x: max(x - 24, 0))
+    return pd.DataFrame({"hdd":hdd, "cdd":cdd})
 
 class DataCleaningService:
 

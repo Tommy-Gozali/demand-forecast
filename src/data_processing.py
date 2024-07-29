@@ -8,6 +8,7 @@ from utils import DataCleaningService, FeatureEngineering
 from create_experiment import CreateTimeSeriesExperiment
 from get_exog_data import OpenMeteoApi
 from sklearn.preprocessing import PolynomialFeatures
+from feature_engine.creation import CyclicalFeatures
 
 cwd = os.path.abspath("")
 raw_data_file_path = os.path.join(cwd, './data/power_load_BE_elia_15M_2015_2024.csv')
@@ -64,7 +65,8 @@ start_date_train, end_date_train = get_start_end_date(train_indexes)
 start_date_val,  end_date_val    = get_start_end_date(val_indexes)
 start_date_test,  end_date_test  = get_start_end_date(test_indexes)
 
-exog_wea_features = ["temperature_2m", "relative_humidity_2m", "dew_point_2m", "apparent_temperature", "is_day"]
+exog_wea_features = ["temperature_2m", "relative_humidity_2m", "dew_point_2m", 
+                     "apparent_temperature", "is_day", "sunshine_duration"]
 
 parameters_train = brussel_weather_data.initiate_parameters(start_date = start_date_train,
                                                             end_date = end_date_train,
@@ -77,7 +79,7 @@ parameters_val = brussel_weather_data.initiate_parameters(start_date = start_dat
                                                             parameters = exog_wea_features)
 
 data[exog_wea_features] = brussel_weather_data.get_historical_actual_data(parameters_train)\
-                            .combine_first(brussel_weather_data.get_historical_forecast_data(parameters_val))\
+                            .combine_first(brussel_weather_data.get_historical_actual_data(parameters_val))\
                             .combine_first(brussel_weather_data.get_historical_forecast_data(parameters_test))
 
 # FEATURE ENGINEERING
@@ -119,6 +121,16 @@ poly_features.columns = [f"poly_{col}" for col in poly_features.columns]
 poly_features.columns = poly_features.columns.str.replace(" ", "__")
 
 
+cyclical = CyclicalFeatures(variables=None, drop_original=True)
+cyclical_raw_features = basic_temporal_features + exog_wea_features
+cyclical_fin_features = [f"{col}_sin" for col in cyclical_raw_features] + [f"{col}_cos" for col in cyclical_raw_features]
+
+temp_dd_features = ["hdd", "cdd"]
+data[temp_dd_features] = fe.get_hdd_cdd(data["temperature_2m"])
+
+data = pd.concat([data, cyclical.fit_transform(data[cyclical_raw_features])], axis = 1)
+data[poly_features.columns] = poly_features
+
 data_train = data.loc[train_indexes].dropna() #TO DELETE MISSING ROWS DUE TO ROLLED PARAMETERS
 data_val   = data.loc[val_indexes]
 data_test  = data.loc[test_indexes]
@@ -133,4 +145,6 @@ print("New datasets after considering rolled features!")
 print(f"Train dates : {data_train.index.min()} --- {data_train.index.max()}  (n={len(data_train.index)})")
 print(f"Test dates  : {data_val.index.min()} --- {data_val.index.max()}  (n={len(data_val.index)})")
 print(f"Val dates   : {data_test.index.min()} --- {data_test.index.max()}  (n={len(data_test.index)})")
-exog_vars = basic_temporal_features + exog_wea_features + rolled_features
+
+exog_vars =  cyclical_fin_features + cyclical_raw_features + rolled_features \
+    + list(poly_features.columns.values) + temp_dd_features
