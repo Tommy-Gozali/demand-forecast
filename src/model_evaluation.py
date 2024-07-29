@@ -1,16 +1,17 @@
 import os
 import joblib
-from data_processing import steps, data, data_train, data_test, exog_vars, hour_in_week
+from data_processing import steps, data, data_train, data_test, data_val, exog_vars, hour_in_week
 from sklearn.metrics import mean_absolute_percentage_error
 from skforecast.model_selection import backtesting_forecaster
-
+import pandas as pd
 
 cwd = os.path.dirname(__file__)
-modelling_file_path = os.path.join(cwd, './modelling/model/forecaster.joblib')
+modelling_file_path = os.path.join(cwd, "results_gpu_train_XGBRegressor_24_steps.joblib")
 backtest_result_file_path = os.path.join(cwd, '../data/backtest_result.csv')
 
 forecaster = joblib.load(modelling_file_path)
-regressor_name = str(forecaster.regressor).split('()')[0]
+regressor_name = str(forecaster.regressor).split('(')[0]
+data_train_val = pd.concat([data_train, data_val])
 
 # Predictions
 # ==============================================================================
@@ -39,7 +40,7 @@ def backtest():
                           steps              = hour_in_week,
                           exog               = data[exog_vars],
                           metric             = 'mean_absolute_percentage_error',
-                          initial_train_size = len(data_train),
+                          initial_train_size = len(data_train_val),
                           refit              = True,
                           n_jobs             = 'auto',
                           verbose            = True,
@@ -53,3 +54,5 @@ def backtest():
         print(f"Fold {i}: {fold}")
         
     return data_test.to_csv(backtest_result_file_path, index = False)
+
+backtest()
