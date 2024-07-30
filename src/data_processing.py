@@ -11,7 +11,7 @@ from sklearn.preprocessing import PolynomialFeatures
 from feature_engine.creation import CyclicalFeatures
 
 cwd = os.getcwd()
-raw_data_file_path = os.path.join(cwd, '../data/power_load_BE_elia_15M_2015_2024.csv')
+raw_data_file_path = os.path.join(cwd, './data/power_load_BE_elia_15M_2015_2024.csv')
 df = pd.read_csv(raw_data_file_path, delimiter = ";", on_bad_lines="skip")
 
 clean_start_date = "2021-11-01"

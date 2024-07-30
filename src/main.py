@@ -14,6 +14,8 @@ from sklearn.metrics import mean_absolute_percentage_error, mean_squared_error, 
 import joblib
 import pandas as pd
 import matplotlib.pyplot as plt
+from xgboost import XGBRegressor 
+
 
 from data_processing import (data_test, exog_vars, steps
     #data, data_train, data_val, data_val, exog_vars, hour_in_month, steps
@@ -43,7 +45,7 @@ cwd = os.path.dirname(__file__)
 modelling_file_path = os.path.join(cwd, "results_gpu_train_XGBRegressor_24_steps.joblib") #'./modelling/model/forecaster.joblib')
 
 forecaster = joblib.load(modelling_file_path)
-regressor_name = str(forecaster.regressor).split('()')[0]
+regressor_name = str(forecaster.regressor).split('(')[0]
 
 def predict_single_forecast(data_val: pd.DataFrame, steps: int, exog_vars: list):
     predictions = forecaster.predict(steps = steps,
