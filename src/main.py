@@ -41,8 +41,8 @@ joblib.dump(forecaster, modelling_file_path)
 
 # Predictions
 # ==============================================================================
-cwd = os.path.dirname(__file__)
-modelling_file_path = os.path.join(cwd, "results_gpu_train_XGBRegressor_24_steps.joblib") #'./modelling/model/forecaster.joblib')
+cwd = os.getcwd()
+modelling_file_path = os.path.join(cwd, "src/modelling/model/results_gpu_train_XGBRegressor_24_steps.joblib") #'./modelling/model/forecaster.joblib')
 
 forecaster = joblib.load(modelling_file_path)
 regressor_name = str(forecaster.regressor).split('(')[0]
