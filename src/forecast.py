@@ -9,6 +9,7 @@ class BacktestingForecaster():
             forecaster: ForecasterAutoreg,
             y: pd.DataFrame,
             steps: int,
+            exog: pd.DataFrame,
             initial_train_size: int,
             metric,
             refit: bool,
@@ -16,16 +17,17 @@ class BacktestingForecaster():
         self.forecaster = forecaster
         self.y = y
         self.steps = steps
+        self.exog = exog
         self.initial_train_size = initial_train_size
         self.metric = metric
         self.refit = refit
 
-    def backtesting_forecaster(self, exog = None):
+    def backtesting_forecaster(self):
         return model_selection.backtesting_forecaster(
             forecaster= self.forecaster,
             y = self.y,
             steps = self.steps,
-            exog=exog,
+            exog= self.exog,
             initial_train_size=self.initial_train_size,
             metric=self.metric,
             refit = self.refit,
